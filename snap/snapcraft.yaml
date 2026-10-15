@@ -47,6 +47,7 @@ apps:
     environment:
       HOME: $SNAP_USER_COMMON
       TMPDIR: $XDG_RUNTIME_DIR
+      EGL_DISABLE_SELF_UPDATE: 1
 
 parts:
   launcher:
