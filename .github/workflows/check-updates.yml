@@ -1,0 +1,36 @@
+name: Check for new Epic Games Launcher version
+
+on:
+  schedule:
+    - cron: "17 */6 * * *"
+  workflow_dispatch:
+
+permissions:
+  contents: write
+  actions: write
+
+jobs:
+  update:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+
+      - name: Update snapcraft.yaml
+        id: update
+        run: bash .github/scripts/update-version.sh | tee -a "$GITHUB_OUTPUT"
+
+      - name: Commit and push
+        if: steps.update.outputs.updated == 'true'
+        run: |
+          git config user.name "github-actions[bot]"
+          git config user.email "41898282+github-actions[bot]@users.noreply.github.com"
+          git add snap/snapcraft.yaml
+          git commit -m "Update Epic Games Launcher to ${{ steps.update.outputs.version }}"
+          git push
+
+      # Pushes made with GITHUB_TOKEN do not trigger other workflows
+      - name: Trigger build
+        if: steps.update.outputs.updated == 'true'
+        env:
+          GH_TOKEN: ${{ github.token }}
+        run: gh workflow run build-devel.yml --ref "${{ github.ref_name }}"

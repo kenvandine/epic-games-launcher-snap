@@ -1,0 +1,39 @@
+name: Build and publish devel snap
+
+on:
+  push:
+    branches: [main]
+  workflow_dispatch:
+
+permissions:
+  contents: write
+
+concurrency:
+  group: build-devel
+  cancel-in-progress: true
+
+jobs:
+  build:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+
+      - name: Build snap
+        id: build
+        uses: snapcore/action-build@v1
+
+      - uses: actions/upload-artifact@v4
+        with:
+          name: snap
+          path: ${{ steps.build.outputs.snap }}
+
+      - name: Publish rolling "devel" release
+        env:
+          GH_TOKEN: ${{ github.token }}
+        run: |
+          gh release delete devel --cleanup-tag --yes || true
+          gh release create devel "${{ steps.build.outputs.snap }}" \
+            --target "${{ github.sha }}" \
+            --prerelease \
+            --title "devel" \
+            --notes "Rolling build of commit ${{ github.sha }}. Install with: \`sudo snap install --dangerous <file>.snap\` then \`sudo snap connect epic-games-launcher:steam-support\`."
