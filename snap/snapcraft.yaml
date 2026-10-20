@@ -41,11 +41,14 @@ apps:
       - network
       - network-bind
       - network-status
+      - process-control
+      - mount-observe
       - removable-media
       - shmem
       - system-observe
     environment:
       HOME: $SNAP_USER_COMMON
+      XDG_DATA_HOME: $SNAP_USER_COMMON/.local/share
       TMPDIR: $XDG_RUNTIME_DIR
       EGL_DISABLE_SELF_UPDATE: 1
 
