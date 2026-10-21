@@ -1,7 +1,7 @@
 name: epic-games-launcher
 title: Epic Games Launcher
 base: core24
-version: "0.99.0"
+version: "0.100.0"
 summary: Epic Games Launcher for Linux
 description: |
   The Epic Games Launcher lets you browse, buy, install and play games from
@@ -63,8 +63,8 @@ parts:
     override-pull: |
       craftctl default
       curl -fL -o EpicGamesLauncher.AppImage \
-        "https://content-download-egs.distro.on.epicgames.com/Builds/EGLv2/0.99.0%2Bgbf52ace/Linux/EpicGamesLauncher-x86_64.AppImage"
-      echo "ac96fc4ccca97842497f866726627fdf4f98b8faffc89baabbb1823b9fe231ac  EpicGamesLauncher.AppImage" | sha256sum -c -
+        "https://content-download-egs.distro.on.epicgames.com/Builds/EGLv2/0.100.0%2Bg9dfc3c3/Linux/EpicGamesLauncher-x86_64.AppImage"
+      echo "a9b7e40e3e5220bce97068b3974a796530e5bdbc77db1e1beba0d7bdbed0b44e  EpicGamesLauncher.AppImage" | sha256sum -c -
     override-build: |
       craftctl default
       chmod +x "$CRAFT_PART_SRC/EpicGamesLauncher.AppImage"
