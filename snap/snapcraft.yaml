@@ -11,10 +11,6 @@ description: |
   published at https://launcher.epicgames.com/. Epic, Epic Games and the
   Epic Games Launcher are trademarks of Epic Games, Inc.
 
-  Games rely on the steam-support interface (Steam runtime and pressure-vessel
-  container support), which may need to be connected manually:
-
-    snap connect epic-games-launcher:steam-support
 icon: snap/gui/epic-games-launcher.png
 grade: devel
 confinement: strict
