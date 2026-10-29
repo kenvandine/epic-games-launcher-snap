@@ -1,6 +1,6 @@
 name: epic-games-launcher
 title: Epic Games Launcher
-base: core24
+base: core26
 version: "0.105.0"
 summary: Epic Games Launcher for Linux
 description: |
