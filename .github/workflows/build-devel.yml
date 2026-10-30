@@ -37,3 +37,12 @@ jobs:
             --prerelease \
             --title "devel" \
             --notes "Rolling build of commit ${{ github.sha }}. Install with: \`sudo snap install --dangerous <file>.snap\` then \`for i in process-control hardware-observe system-observe; do sudo snap connect epic-games-launcher:$i; done\`."
+
+      - name: Publish to candidate channel
+        if: github.ref == 'refs/heads/main'
+        uses: snapcore/action-publish@v1
+        env:
+          SNAPCRAFT_STORE_CREDENTIALS: ${{ secrets.STORE_LOGIN }}
+        with:
+          snap: ${{ steps.build.outputs.snap }}
+          release: candidate
