@@ -12,7 +12,7 @@ description: |
   Epic Games Launcher are trademarks of Epic Games, Inc.
 
 icon: snap/gui/epic-games-launcher.png
-grade: devel
+grade: stable
 confinement: strict
 license: Proprietary
 platforms:
