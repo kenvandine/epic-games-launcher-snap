@@ -1,0 +1,70 @@
+name: Build and publish snap
+
+on:
+  push:
+    branches: [main]
+  schedule:
+    - cron: "17 */6 * * *"
+  workflow_dispatch:
+
+permissions:
+  contents: read
+
+concurrency:
+  group: build
+  cancel-in-progress: true
+
+jobs:
+  check:
+    runs-on: ubuntu-latest
+    outputs:
+      build: ${{ steps.check.outputs.build }}
+    steps:
+      - name: Compare upstream version with the candidate channel
+        id: check
+        run: |
+          if [ "${{ github.event_name }}" != "schedule" ]; then
+            echo "build=true" >> "$GITHUB_OUTPUT"
+            exit 0
+          fi
+          api="https://launcher-public-service-prod06.ol.epicgames.com/launcher/api/installer/download/EpicGamesLauncher-x86_64.deb"
+          location="$(curl -fsSI "$api" | tr -d '\r' | awk 'tolower($1)=="location:"{print $2}')"
+          raw="$(sed -n 's|.*/EGLv2/\([^/]*\)/Linux/.*|\1|p' <<<"$location")"
+          if [ -z "$raw" ]; then
+            echo "Could not parse build id from redirect: $location" >&2
+            exit 1
+          fi
+          upstream="${raw//%2B/+}"
+          published="$(curl -fsS -H 'Snap-Device-Series: 16' \
+            'https://api.snapcraft.io/v2/snaps/info/epic-games-launcher?fields=version' |
+            jq -r '.["channel-map"][] | select(.channel.name=="candidate" and .channel.architecture=="amd64") | .version')"
+          echo "upstream=$upstream candidate=$published"
+          if [ "$upstream" = "$published" ]; then
+            echo "build=false" >> "$GITHUB_OUTPUT"
+          else
+            echo "build=true" >> "$GITHUB_OUTPUT"
+          fi
+
+  build:
+    needs: check
+    if: needs.check.outputs.build == 'true'
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+
+      - name: Build snap
+        id: build
+        uses: snapcore/action-build@v1
+
+      - uses: actions/upload-artifact@v4
+        with:
+          name: snap
+          path: ${{ steps.build.outputs.snap }}
+
+      - name: Publish to candidate channel
+        uses: snapcore/action-publish@v1
+        env:
+          SNAPCRAFT_STORE_CREDENTIALS: ${{ secrets.STORE_LOGIN }}
+        with:
+          snap: ${{ steps.build.outputs.snap }}
+          release: candidate
