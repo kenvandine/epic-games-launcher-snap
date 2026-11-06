@@ -25,7 +25,7 @@ plugs:
 
 apps:
   epic-games-launcher:
-    command: epic-games-launcher/usr/bin/EpicGamesLauncher
+    command: bin/launcher.sh
     extensions: [gnome]
     desktop: epic-games-launcher/epic-games-launcher.desktop
     common-id: com.epicgames.launcher
@@ -49,6 +49,12 @@ apps:
       EGL_DISABLE_SELF_UPDATE: 1
 
 parts:
+  launcher-script:
+    plugin: dump
+    source: snap/local
+    organize:
+      launcher.sh: bin/launcher.sh
+
   launcher:
     plugin: nil
     build-packages:
@@ -56,6 +62,7 @@ parts:
       - ca-certificates
     stage-packages:
       - xdg-utils
+      - zenity
     override-pull: |
       craftctl default
       curl -fL -o EpicGamesLauncher.AppImage \
