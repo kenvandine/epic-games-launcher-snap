@@ -19,8 +19,15 @@ Run the following in a terminal, then start the launcher again:
 ${cmds}"
     echo "$msg" >&2
     if command -v zenity >/dev/null 2>&1; then
-        zenity --error --no-markup --title="Epic Games Launcher" \
-            --width=480 --text="$msg" >/dev/null 2>&1
+        if zenity --question --no-markup --title="Epic Games Launcher" \
+            --width=480 --text="$msg" \
+            --ok-label="Copy commands" --cancel-label="Close" >/dev/null 2>&1; then
+            if [ -n "$WAYLAND_DISPLAY" ] && command -v wl-copy >/dev/null 2>&1; then
+                printf '%s' "$cmds" | wl-copy
+            elif command -v xclip >/dev/null 2>&1; then
+                printf '%s' "$cmds" | xclip -selection clipboard
+            fi
+        fi
     fi
     exit 1
 fi

@@ -61,6 +61,8 @@ parts:
       - curl
       - ca-certificates
     stage-packages:
+      - wl-clipboard
+      - xclip
       - xdg-utils
       - zenity
     override-pull: |
