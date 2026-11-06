@@ -1,13 +1,13 @@
 name: epic-games-launcher
 title: Epic Games Launcher
 base: core26
-version: "0.110.0"
+adopt-info: launcher
 summary: Epic Games Launcher for Linux
 description: |
   The Epic Games Launcher lets you browse, buy, install and play games from
   the Epic Games Store.
 
-  This is an unofficial snap that repackages the official Linux AppImage
+  This is an unofficial snap that repackages the official Linux deb package
   published at https://launcher.epicgames.com/. Epic, Epic Games and the
   Epic Games Launcher are trademarks of Epic Games, Inc.
 
@@ -27,7 +27,7 @@ apps:
   epic-games-launcher:
     command: bin/launcher.sh
     extensions: [gnome]
-    desktop: epic-games-launcher/epic-games-launcher.desktop
+    desktop: epic-games-launcher/usr/share/applications/epic-games-launcher.desktop
     common-id: com.epicgames.launcher
     plugs:
       - audio-playback
@@ -61,30 +61,22 @@ parts:
       - curl
       - ca-certificates
     stage-packages:
+      - libayatana-appindicator3-1
       - wl-clipboard
       - xclip
       - xdg-utils
       - zenity
     override-pull: |
       craftctl default
-      curl -fL -o EpicGamesLauncher.AppImage \
-        "https://content-download-egs.distro.on.epicgames.com/Builds/EGLv2/0.110.0%2Bgf2e5ba5/Linux/EpicGamesLauncher-x86_64.AppImage"
-      echo "53bbd1242e095f609963280ef132158115442ab719ba45785c5a93eafaa95c40  EpicGamesLauncher.AppImage" | sha256sum -c -
+      curl -fL -o EpicGamesLauncher.deb \
+        "https://launcher-public-service-prod06.ol.epicgames.com/launcher/api/installer/download/EpicGamesLauncher-x86_64.deb"
+      craftctl set version="$(dpkg-deb -f EpicGamesLauncher.deb Version)"
     override-build: |
       craftctl default
-      chmod +x "$CRAFT_PART_SRC/EpicGamesLauncher.AppImage"
-      cd "$CRAFT_PART_BUILD"
-      "$CRAFT_PART_SRC/EpicGamesLauncher.AppImage" --appimage-extract >/dev/null
-      mv squashfs-root "$CRAFT_PART_INSTALL/epic-games-launcher"
-      # AppImage extraction yields 0700 dirs, unreadable by the snap user
+      mkdir -p "$CRAFT_PART_INSTALL/epic-games-launcher"
+      dpkg-deb -x "$CRAFT_PART_SRC/EpicGamesLauncher.deb" "$CRAFT_PART_INSTALL/epic-games-launcher"
       chmod -R u+rwX,go+rX,go-w "$CRAFT_PART_INSTALL/epic-games-launcher"
-      # Drop the bundled GTK/WebKit/Mesa stack (the gnome extension provides it).
-      # Keep only the EOS SDK, which the binary needs via RUNPATH $ORIGIN/../lib.
-      cd "$CRAFT_PART_INSTALL/epic-games-launcher/usr"
-      find lib -mindepth 1 -maxdepth 1 \
-        ! -name libEOSSDK-Linux-Shipping.so ! -name epic-games-launcher -exec rm -rf {} +
-      rm -rf share/glib-2.0 share/icons
       # Point the desktop entry at the snap command and icon
       sed -i -e 's|^Exec=.*|Exec=epic-games-launcher %u|' \
              -e 's|^Icon=.*|Icon=${SNAP}/meta/gui/icon.png|' \
-        "$CRAFT_PART_INSTALL/epic-games-launcher/epic-games-launcher.desktop"
+        "$CRAFT_PART_INSTALL/epic-games-launcher/usr/share/applications/epic-games-launcher.desktop"
