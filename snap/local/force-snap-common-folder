@@ -28,10 +28,6 @@ for d in themes mime glib-2.0 icons; do
   link_into_common "$SNAP_USER_DATA/.local/share/$d" "$SNAP_USER_COMMON/.local/share/$d"
 done
 
-if [ -d "$SNAP_USER_DATA/Games" ]; then
-    mv -f "$SNAP_USER_DATA/Games" "$SNAP_USER_COMMON/"
-fi
-
 if [ -d "$SNAP_USER_DATA/.local/share/com.epicgames.eglv2" ]; then
     mv -f "$SNAP_USER_DATA/.local/share/com.epicgames.eglv2" "$SNAP_USER_COMMON/.local/share/"
 fi
