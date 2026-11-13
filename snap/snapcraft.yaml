@@ -25,6 +25,7 @@ plugs:
 
 apps:
   epic-games-launcher:
+    command-chain: [bin/force-snap-common-folder]
     command: bin/launcher.sh
     extensions: [gnome]
     desktop: epic-games-launcher/usr/share/applications/epic-games-launcher.desktop
@@ -42,11 +43,12 @@ apps:
       - removable-media
       - shmem
       - system-observe
+      - screen-inhibit-control
     environment:
       HOME: $SNAP_USER_COMMON
-      XDG_DATA_HOME: $SNAP_USER_COMMON/.local/share
       TMPDIR: $XDG_RUNTIME_DIR
       EGL_DISABLE_SELF_UPDATE: 1
+      PROTON_USE_WOW64: "1"
 
 parts:
   launcher-script:
@@ -54,6 +56,7 @@ parts:
     source: snap/local
     organize:
       launcher.sh: bin/launcher.sh
+      force-snap-common-folder: bin/force-snap-common-folder
 
   launcher:
     plugin: nil
@@ -80,3 +83,18 @@ parts:
       sed -i -e 's|^Exec=.*|Exec=epic-games-launcher %u|' \
              -e 's|^Icon=.*|Icon=${SNAP}/meta/gui/icon.png|' \
         "$CRAFT_PART_INSTALL/epic-games-launcher/usr/share/applications/epic-games-launcher.desktop"
+
+  dependencies:
+    after: [launcher-script, launcher]
+    plugin: nil
+    stage-packages:
+      - libsdl2-2.0-0
+      - libsamplerate0
+      - libsdl2-classic
+      - libxss1
+    prime:
+      - usr/lib/$CRAFT_ARCH_TRIPLET_BUILD_FOR/libSDL2*
+      - usr/lib/$CRAFT_ARCH_TRIPLET_BUILD_FOR/libdecor-0*
+      - usr/lib/$CRAFT_ARCH_TRIPLET_BUILD_FOR/libsamplerate*
+      - usr/lib/$CRAFT_ARCH_TRIPLET_BUILD_FOR/sdl2-classic
+      - usr/lib/$CRAFT_ARCH_TRIPLET_BUILD_FOR/libXss.so*
