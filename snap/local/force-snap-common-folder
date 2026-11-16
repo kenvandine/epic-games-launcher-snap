@@ -28,6 +28,18 @@ for d in themes mime glib-2.0 icons; do
   link_into_common "$SNAP_USER_DATA/.local/share/$d" "$SNAP_USER_COMMON/.local/share/$d"
 done
 
+# snapd looks for the autostart entry under SNAP_USER_DATA, but HOME/XDG_CONFIG_HOME
+# point at SNAP_USER_COMMON, so expose the autostart directory there.
+mkdir -p "$SNAP_USER_COMMON/.config/autostart"
+if [ ! -L "$SNAP_USER_DATA/.config/autostart" ]; then
+  mkdir -p "$SNAP_USER_DATA/.config"
+  if [ -d "$SNAP_USER_DATA/.config/autostart" ]; then
+    cp -an "$SNAP_USER_DATA/.config/autostart/." "$SNAP_USER_COMMON/.config/autostart/" 2>/dev/null
+    rm -rf "$SNAP_USER_DATA/.config/autostart"
+  fi
+  ln -sfn "$SNAP_USER_COMMON/.config/autostart" "$SNAP_USER_DATA/.config/autostart"
+fi
+
 if [ -d "$SNAP_USER_DATA/.local/share/com.epicgames.eglv2" ]; then
     mv -f "$SNAP_USER_DATA/.local/share/com.epicgames.eglv2" "$SNAP_USER_COMMON/.local/share/"
 fi

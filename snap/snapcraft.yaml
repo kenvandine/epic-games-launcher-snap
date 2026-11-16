@@ -30,6 +30,7 @@ apps:
     extensions: [gnome]
     desktop: epic-games-launcher/usr/share/applications/epic-games-launcher.desktop
     common-id: com.epicgames.launcher
+    autostart: epic-games-launcher.desktop
     plugs:
       - audio-playback
       - hardware-observe
