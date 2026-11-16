@@ -40,6 +40,13 @@ if [ ! -L "$SNAP_USER_DATA/.config/autostart" ]; then
   ln -sfn "$SNAP_USER_COMMON/.config/autostart" "$SNAP_USER_DATA/.config/autostart"
 fi
 
+# The launcher writes a revision-specific binary path into its autostart entry;
+# point it at the snap command so it survives refreshes and goes through launcher.sh.
+for f in "$SNAP_USER_COMMON/.config/autostart/"*.desktop; do
+  [ -f "$f" ] || continue
+  sed -i -E "s|^Exec=.*EpicGamesLauncher(.*)|Exec=${SNAP_INSTANCE_NAME}\\1|" "$f"
+done
+
 if [ -d "$SNAP_USER_DATA/.local/share/com.epicgames.eglv2" ]; then
     mv -f "$SNAP_USER_DATA/.local/share/com.epicgames.eglv2" "$SNAP_USER_COMMON/.local/share/"
 fi
